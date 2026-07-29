@@ -266,10 +266,15 @@ export class WorldManager {
       block.rotation.y = -angle + (Math.random() - 0.5) * 0.5;
       this.scene.add(block);
       
+      const rotatedSize = new THREE.Vector3(width, height, depth).applyAxisAngle(new THREE.Vector3(0, 1, 0), block.rotation.y);
+      rotatedSize.x = Math.abs(rotatedSize.x);
+      rotatedSize.y = Math.abs(rotatedSize.y);
+      rotatedSize.z = Math.abs(rotatedSize.z);
+
       this.colliders.push({
         type: 'box',
         pos: block.position.clone(),
-        size: new THREE.Vector3(width, height, depth).applyAxisAngle(new THREE.Vector3(0,1,0), block.rotation.y).absolute()
+        size: rotatedSize
       });
     }
 
