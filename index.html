@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Outbreak Survival: The First Night</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- Google Fonts for premium typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Share+Tech+Mono&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+  <!-- Import map for Three.js ES modules -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+      }
+    }
+  </script>
+</head>
+<body>
+  <!-- 3D Game Canvas -->
+  <canvas id="game-canvas"></canvas>
+
+  <!-- Sound/Interaction Init Overlay -->
+  <div id="interaction-overlay" class="overlay active">
+    <div class="glass-panel text-center">
+      <h1 class="glitch-text" data-text="OUTBREAK">OUTBREAK</h1>
+      <p class="subtitle">A Post-Apocalyptic Survival Experience</p>
+      <div class="divider"></div>
+      <button id="start-btn" class="btn primary-btn">START EXPERIENCE</button>
+      <p class="footnote">Clicking Start initializes audio & 3D renderer. Headphones recommended.</p>
+    </div>
+  </div>
+
+  <!-- Developer Intro Cinematic Overlay -->
+  <div id="dev-intro-overlay" class="overlay">
+    <div class="intro-credits">
+      <p class="credits-label">A GAME CREATED BY</p>
+      <h1 class="credits-names">MAHDI & ARMAN</h1>
+    </div>
+  </div>
+
+  <!-- Story Cinematic Overlay -->
+  <div id="cinematic-overlay" class="overlay">
+    <div class="widescreen-bars">
+      <div class="top-bar"></div>
+      <div class="bottom-bar"></div>
+    </div>
+    <div class="story-container">
+      <p id="story-text" class="story-text"></p>
+    </div>
+    <button id="skip-cinematic-btn" class="btn secondary-btn skip-btn">SKIP INTRO</button>
+  </div>
+
+  <!-- Mission Briefing Panel -->
+  <div id="briefing-overlay" class="overlay">
+    <div class="glass-panel briefing-panel">
+      <h2 class="section-title text-red">MISSION DEPLOYMENT</h2>
+      <div class="divider red-divider"></div>
+      <div class="briefing-content">
+        <div class="briefing-header">
+          <p><strong>LOCATION:</strong> District 9 Safe House Yard</p>
+          <p><strong>STATUS:</strong> Outbreak Day 47</p>
+        </div>
+        <p class="briefing-desc">
+          A mysterious virus has decimated the population. The city has fallen, and monsters roam the streets. 
+          You have found a temporary safe house yard. Secure the area, gather equipment, and prepare.
+        </p>
+        <div class="objective-list-container">
+          <h3>PRIMARY OBJECTIVES:</h3>
+          <ul class="briefing-objectives">
+            <li><span>✔</span> Survive the outbreak.</li>
+            <li><span>✔</span> Reach the Safe House shelter.</li>
+            <li><span>✔</span> Endure the first night.</li>
+          </ul>
+        </div>
+      </div>
+      <button id="accept-mission-btn" class="btn primary-btn red-btn">ACCEPT MISSION</button>
+    </div>
+  </div>
+
+  <!-- Pointer Lock Click Cover -->
+  <div id="pointerlock-cover" class="overlay">
+    <div class="glass-panel text-center click-panel">
+      <p class="pulse-text">CLICK SCREEN TO RESUME SURVIVAL</p>
+      <p class="keys-info">WASD to Move | Mouse to Look | ESC to Pause</p>
+    </div>
+  </div>
+
+  <!-- HUD Interface (Active during gameplay) -->
+  <div id="hud" class="hud-container hidden">
+    <!-- Top Bar: Location & Help Tips -->
+    <div class="hud-top">
+      <div class="location-display">
+        <span class="pulse-dot"></span>
+        <span id="zone-name">SAFE HOUSE YARD</span>
+      </div>
+      <div id="help-tips-container" class="help-tips">
+        <p id="help-tip-text">Search abandoned buildings for supplies.</p>
+      </div>
+      <div class="time-display">
+        <span id="time-clock">18:00</span>
+      </div>
+    </div>
+
+    <!-- Left Side: Interactive Tutorial Progress -->
+    <div id="tutorial-panel" class="tutorial-panel">
+      <h3 class="panel-title">TUTORIAL TASKS</h3>
+      <ul id="tutorial-steps-list">
+        <li data-step="1" class="active">Move using WASD <span class="chk">[ ]</span></li>
+        <li data-step="2">Look around using mouse <span class="chk">[ ]</span></li>
+        <li data-step="3">Jump (Space) <span class="chk">[ ]</span></li>
+        <li data-step="4">Sprint (Shift) <span class="chk">[ ]</span></li>
+        <li data-step="5">Crouch (C) <span class="chk">[ ]</span></li>
+        <li data-step="6">Interact with object <span class="chk">[ ]</span></li>
+        <li data-step="7">Pick up a Gun <span class="chk">[ ]</span></li>
+        <li data-step="8">Reload Gun (R) <span class="chk">[ ]</span></li>
+        <li data-step="9">Fire at a target <span class="chk">[ ]</span></li>
+        <li data-step="10">Pick up a Bow <span class="chk">[ ]</span></li>
+        <li data-step="11">Charge and shoot arrow <span class="chk">[ ]</span></li>
+        <li data-step="12">Defeat your first monster <span class="chk">[ ]</span></li>
+        <li data-step="13">Collect loot box <span class="chk">[ ]</span></li>
+        <li data-step="14">Open inventory (Tab / I) <span class="chk">[ ]</span></li>
+        <li data-step="15">Reach the Safe House <span class="chk">[ ]</span></li>
+      </ul>
+    </div>
+
+    <!-- Right Side: Active Objectives -->
+    <div id="objectives-panel" class="objectives-panel">
+      <h3 class="panel-title text-red">CURRENT OBJECTIVE</h3>
+      <p id="current-objective-desc">Follow tutorial instructions.</p>
+    </div>
+
+    <!-- Bottom Left: Health, Stamina -->
+    <div class="hud-bottom-left">
+      <div class="stat-bar-container">
+        <div class="stat-label">VITALS</div>
+        <div class="stat-bar-wrapper">
+          <div id="health-bar" class="stat-bar health-bg" style="width: 100%;"></div>
+        </div>
+        <div class="stat-value"><span id="health-value">100</span>%</div>
+      </div>
+      <div class="stat-bar-container">
+        <div class="stat-label">STAMINA</div>
+        <div class="stat-bar-wrapper">
+          <div id="stamina-bar" class="stat-bar stamina-bg" style="width: 100%;"></div>
+        </div>
+        <div class="stat-value"><span id="stamina-value">100</span>%</div>
+      </div>
+    </div>
+
+    <!-- Crosshair -->
+    <div id="crosshair" class="crosshair-normal"></div>
+
+    <!-- Bow Charge Indicator -->
+    <div id="bow-charge-container" class="bow-charge-container hidden">
+      <div class="bow-charge-label">BOW DRAWING</div>
+      <div class="bow-charge-bar-wrapper">
+        <div id="bow-charge-bar" class="bow-charge-bar"></div>
+      </div>
+    </div>
+
+    <!-- Bottom Right: Weapon, Ammo, Reload Prompt -->
+    <div class="hud-bottom-right">
+      <div id="weapon-display" class="weapon-display">
+        <div class="weapon-info">
+          <span id="weapon-name">UNARMED</span>
+          <div class="ammo-info">
+            <span id="ammo-clip">0</span> / <span id="ammo-reserve">0</span>
+          </div>
+        </div>
+      </div>
+      <div id="reload-prompt" class="reload-prompt hidden">PRESS R TO RELOAD</div>
+    </div>
+  </div>
+
+  <!-- Inventory Overlay Panel (Toggled via Tab or I) -->
+  <div id="inventory-overlay" class="overlay">
+    <div class="glass-panel inventory-panel">
+      <div class="inventory-header">
+        <h2>SURVIVOR BACKPACK</h2>
+        <button id="close-inventory-btn" class="close-btn">&times;</button>
+      </div>
+      <div class="divider"></div>
+      <div class="inventory-body">
+        <div class="inventory-grid">
+          <!-- Main slot 1 -->
+          <div class="inventory-slot active-weapon-slot" id="slot-pistol">
+            <div class="slot-icon">🔫</div>
+            <div class="slot-name">9mm Handgun</div>
+            <div class="slot-count" id="inv-pistol-count">LOCKED</div>
+          </div>
+          <!-- Main slot 2 -->
+          <div class="inventory-slot" id="slot-bow">
+            <div class="slot-icon">🏹</div>
+            <div class="slot-name">Survival Bow</div>
+            <div class="slot-count" id="inv-bow-count">LOCKED</div>
+          </div>
+          <!-- Supplies Slot 3 -->
+          <div class="inventory-slot" id="slot-ammo">
+            <div class="slot-icon">⚙️</div>
+            <div class="slot-name">9mm Ammo</div>
+            <div class="slot-count" id="inv-ammo-count">0</div>
+          </div>
+          <!-- Supplies Slot 4 -->
+          <div class="inventory-slot" id="slot-arrows">
+            <div class="slot-icon">🍢</div>
+            <div class="slot-name">Arrows</div>
+            <div class="slot-count" id="inv-arrows-count">0</div>
+          </div>
+          <!-- Supplies Slot 5 -->
+          <div class="inventory-slot" id="slot-medkit">
+            <div class="slot-icon">🩹</div>
+            <div class="slot-name">Medkit</div>
+            <div class="slot-count" id="inv-medkit-count">0</div>
+          </div>
+          <!-- Supplies Slot 6 -->
+          <div class="inventory-slot" id="slot-supplies">
+            <div class="slot-icon">🥫</div>
+            <div class="slot-name">Supplies</div>
+            <div class="slot-count" id="inv-supplies-count">0</div>
+          </div>
+        </div>
+        <div class="inventory-details">
+          <h3>ITEM DETAILS</h3>
+          <div id="item-details-content">
+            <p class="select-hint">Select an item in your backpack to view details.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cinematic Alerts ("Night has fallen...", "You Died") -->
+  <div id="cinematic-alerts" class="overlay">
+    <div class="alert-content">
+      <h1 id="alert-title" class="alert-title"></h1>
+      <p id="alert-subtitle" class="alert-subtitle"></p>
+    </div>
+  </div>
+
+  <!-- Game Over Screen -->
+  <div id="gameover-overlay" class="overlay">
+    <div class="glass-panel death-panel">
+      <h1 class="glitch-text text-red" data-text="YOU DIED">YOU DIED</h1>
+      <p class="survival-time-desc">You failed to survive the night.</p>
+      <div id="stats-summary">
+        <p>Monsters Defeated: <span id="stat-monsters-killed">0</span></p>
+        <p>Time Survived: <span id="stat-time-survived">0m 0s</span></p>
+      </div>
+      <button id="restart-btn" class="btn primary-btn red-btn">TRY AGAIN</button>
+    </div>
+  </div>
+
+  <!-- Game Scripts -->
+  <script type="module" src="src/game.js"></script>
+</body>
+</html>
